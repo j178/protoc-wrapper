@@ -12,7 +12,7 @@ $ uv run protoc -I <proto path> ...
 ## Run a specific version of `protoc`
 
 ```console
-$ uv tool run protoc-wrapper@30.0 --version
+$ uvx protoc-wrapper@30.0 --version
 ```
 
 ## TODO
