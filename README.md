@@ -5,7 +5,7 @@ is compititable with the [`protobuf`](https://pypi.org/project/protobuf/) runtim
 
 ```console
 $ uv add 'protoc-wrapper==30.*' --dev
-$ uv add 'protobuf==3.20.*'
+$ uv add 'protobuf==6.30.*'
 $ uv run protoc -I <proto path> ...
 ```
 
@@ -18,4 +18,4 @@ $ uv tool run protoc-wrapper@30.0 --version
 ## TODO
 
 - [ ] Workflow to release new version automatically
-- [ ] Support prereleases
+- [X] Support prereleases

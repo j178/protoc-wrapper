@@ -9,19 +9,17 @@
 # ///
 
 import argparse
-import logging
-import json
-import io
-import os
 import hashlib
-import urllib.request
-import semver
-
+import io
+import logging
+import os
 from pathlib import Path
+from zipfile import ZipFile, ZipInfo
+
+import requests
+import semver
 from packaging.version import Version as PyPIVersion
 from wheel.wheelfile import WheelFile
-from zipfile import ZipInfo, ZipFile
-
 
 PROTOC_PLATFORMS = {
     "linux-aarch_64": "manylinux_2_28_aarch64",
@@ -117,6 +115,10 @@ standalone and requires a support library to be linked with it.  This
 support library is itself covered by the above license.
 """
 
+session = requests.Session()
+if token := os.environ.get("GITHUB_TOKEN"):
+    session.headers.update({"Authorization": f"Bearer {token}"})
+
 
 def write_wheel_file(
     out_dir: str,
@@ -189,6 +191,12 @@ def to_pypi_version(ver: str) -> PyPIVersion:
     A semver prerelease will be converted into a prerelease of PyPI.
     A semver build will be converted into a development part of PyPI.
     """
+    if ver.count(".") == 1:
+        parts = ver.split("-")
+        ver = parts[0] + ".0"
+        if len(parts) > 1:
+            ver += f"-{parts[1]}"
+
     ver = semver.Version.parse(ver)
     v = ver.finalize_version()
     prerelease = ver.prerelease if ver.prerelease else ""
@@ -197,11 +205,10 @@ def to_pypi_version(ver: str) -> PyPIVersion:
 
 
 def get_latest_version() -> str:
-    url = "https://api.github.com/repos/protocolbuffers/protobuf/releases/latest"
-    with urllib.request.urlopen(url) as request:
-        data = request.read()
-    data = json.loads(data)
-    return data["tag_name"]
+    url = "https://api.github.com/repos/protocolbuffers/protobuf/releases?per_page=1"
+    resp = session.get(url)
+    data = resp.json()
+    return data[0]["tag_name"]
 
 
 def write_wheels(
@@ -217,27 +224,25 @@ def write_wheels(
     if version == "latest":
         version = get_latest_version()
     version = version.removeprefix("v")
-    # PyPI version must have 3 parts, so add ".0" if needed
-    if version.count(".") == 1:
-        wheel_version = version + ".0"
-    else:
-        wheel_version = version
-    wheel_version = to_pypi_version(wheel_version)
+    wheel_version = to_pypi_version(version)
 
     for platform in platforms:
-        url = f"https://github.com/protocolbuffers/protobuf/releases/download/v{version}/protoc-{version}-{platform}.zip"
+        # "30.0-rc1" to "30.0-rc-1"
+        version_in_filename = version
+        if "rc" in version:
+            version_in_filename = version.replace("-rc", "-rc-")
+        url = f"https://github.com/protocolbuffers/protobuf/releases/download/v{version}/protoc-{version_in_filename}-{platform}.zip"
 
         python_platform = PROTOC_PLATFORMS[platform]
 
         logging.info(f"Fetching {url} for {python_platform} ({wheel_version})")
-        with urllib.request.urlopen(url) as request:
-            archive = request.read()
+        resp = session.get(url)
 
         wheel_path = write_protoc_wheel(
             outdir,
             version=str(wheel_version),
             platform=python_platform,
-            archive=archive,
+            archive=resp.content,
         )
         with open(wheel_path, "rb") as wheel:
             digest = hashlib.sha256(wheel.read()).hexdigest()
