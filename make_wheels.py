@@ -74,11 +74,9 @@ Classifier: Programming Language :: Python :: 3.12
 Classifier: Programming Language :: Python :: 3.13
 Classifier: Programming Language :: Python :: 3 :: Only
 Classifier: Topic :: Software Development :: Code Generators
-Requires-Dist: protobuf=={version} ; extra == 'runtime'
-Requires-Python: >=3.7
+Requires-Python: >=3.8
 Project-URL: Releases, https://github.com/j178/protoc-wrapper/releases
 Project-URL: Repository, https://github.com/j178/protoc-wrapper
-Provides-Extra: runtime
 Description-Content-Type: text/markdown
 
 {description}
