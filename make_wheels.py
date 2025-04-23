@@ -55,7 +55,7 @@ METADATA = """\
 Metadata-Version: 2.4
 Name: protoc-wrapper
 Version: {version}
-Summary: A Python wrapper around the protoc compiler
+Summary: Repackage official protoc compiler as Python wheels
 Keywords: protobuf,protoc
 Author: j178
 Author-email: j178 <10510431+j178@users.noreply.github.com>
