@@ -11,7 +11,7 @@ $ uv run protoc -I <proto path> ...
 ## Run a specific version of `protoc`
 
 ```console
-$ uv tool run protoc-wrapper --version
+$ uv tool run protoc-wrapper@6.30 --version
 ```
 
 ## TODO
