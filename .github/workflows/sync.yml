@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  sync:
     runs-on: ubuntu-latest
     permissions:
       # For PyPI's trusted publishing.
@@ -18,4 +18,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish wheels
-        run: uv publish -v
+        run: |
+          if [ -z "$(ls -A ./dist)" ]; then
+            echo "No files to publish."
+            exit 0
+          fi
+          uv publish -v
