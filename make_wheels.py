@@ -152,12 +152,15 @@ def write_protoc_wheel(
 
     with ZipFile(io.BytesIO(archive)) as zip_file:
         for entry in zip_file.infolist():
-            if entry.filename.startswith("bin/"):
+            if entry.filename.startswith("bin/protoc"):
                 entry_name = entry.filename[4:]
                 entry_data = zip_file.read(entry.filename)
 
                 zip_info = ZipInfo(f"protoc_wrapper/{entry_name}")
                 zip_info.external_attr = entry.external_attr
+                zip_info.date_time = (1980, 1, 1, 0, 0, 0)
+                zip_info.create_system = 3
+                zip_info.compress_type = entry.compress_type
                 contents[zip_info] = entry_data
 
     with open("README.md") as f:
