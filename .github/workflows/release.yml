@@ -5,8 +5,8 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to release'
+      tag:
+        description: 'Tag to release'
         required: true
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - name: Make wheels
-        run: uv run make_wheels.py --version ${{ github.ref_name }}
+        run: uv run make_wheels.py --tag ${{ github.event.inputs.tag || github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish wheels
