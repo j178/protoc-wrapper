@@ -4,15 +4,15 @@ is compititable with the [`protobuf`](https://pypi.org/project/protobuf/) runtim
 ## Use `protoc-wrapper` in your project
 
 ```console
-$ uv add 'protoc-wrapper==30.*' --dev
-$ uv add 'protobuf==6.30.*'
+$ uv add 'protoc-wrapper==30.2' --dev
+$ uv add 'protobuf==6.30.2'
 $ uv run protoc -I <proto path> ...
 ```
 
 ## Run a specific version of `protoc`
 
 ```console
-$ uvx protoc-wrapper@30.0 --version
+$ uvx protoc-wrapper@30.2 --version
 ```
 
 ## TODO

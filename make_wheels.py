@@ -1,9 +1,7 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#   "packaging>=25.0",
 #   "requests>=2.32.3",
-#   "semver>=3.0.4",
 #   "wheel>=0.45.1",
 # ]
 # ///
@@ -17,8 +15,6 @@ from pathlib import Path
 from zipfile import ZipFile, ZipInfo
 
 import requests
-import semver
-from packaging.version import Version as PyPIVersion
 from wheel.wheelfile import WheelFile
 
 PROTOC_PLATFORMS = {
@@ -185,23 +181,15 @@ def write_protoc_wheel(
     )
 
 
-def to_pypi_version(ver: str) -> PyPIVersion:
-    """Converts a semver version into a version from PyPI
-
-    A semver prerelease will be converted into a prerelease of PyPI.
-    A semver build will be converted into a development part of PyPI.
+def to_pypi_version(ver: str) -> str:
+    """Converts a protoc release version to a PyPI-compatible version.
+    For example, "30.0" becomes "30.0.0" and "31.0-rc1" becomes "31.0.0rc1".
     """
-    if ver.count(".") == 1:
-        parts = ver.split("-")
-        ver = parts[0] + ".0"
-        if len(parts) > 1:
-            ver += f"-{parts[1]}"
+    parts = ver.split("-")
+    if parts[0].count(".") == 1:
+        parts[0] = parts[0] + ".0"
 
-    ver = semver.Version.parse(ver)
-    v = ver.finalize_version()
-    prerelease = ver.prerelease if ver.prerelease else ""
-    build = ver.build if ver.build else ""
-    return PyPIVersion(f"{v}{prerelease}{build}")
+    return "".join(parts)
 
 
 def get_latest_version() -> str:
@@ -220,7 +208,6 @@ def write_wheels(
     if not platforms:
         platforms = list(PROTOC_PLATFORMS)
 
-    # TODO: handle "latest" version
     if version == "latest":
         version = get_latest_version()
     version = version.removeprefix("v")
@@ -228,9 +215,7 @@ def write_wheels(
 
     for platform in platforms:
         # "30.0-rc1" to "30.0-rc-1"
-        version_in_filename = version
-        if "rc" in version:
-            version_in_filename = version.replace("-rc", "-rc-")
+        version_in_filename = version.replace("-rc", "-rc-")
         url = f"https://github.com/protocolbuffers/protobuf/releases/download/v{version}/protoc-{version_in_filename}-{platform}.zip"
 
         python_platform = PROTOC_PLATFORMS[platform]
