@@ -1,11 +1,3 @@
-# /// script
-# requires-python = ">=3.13"
-# dependencies = [
-#   "requests>=2.32.3",
-#   "wheel>=0.45.1",
-# ]
-# ///
-
 import argparse
 import hashlib
 import io
@@ -185,6 +177,7 @@ def to_pypi_version(ver: str) -> str:
     """Converts a protoc release version to a PyPI-compatible version.
     For example, "30.0" becomes "30.0.0" and "31.0-rc1" becomes "31.0.0rc1".
     """
+    ver = ver.removeprefix("v")
     parts = ver.split("-")
     if parts[0].count(".") == 1:
         parts[0] = parts[0] + ".0"
@@ -192,7 +185,7 @@ def to_pypi_version(ver: str) -> str:
     return "".join(parts)
 
 
-def get_latest_version() -> str:
+def get_latest_tag() -> str:
     url = "https://api.github.com/repos/protocolbuffers/protobuf/releases?per_page=1"
     resp = session.get(url)
     data = resp.json()
@@ -201,22 +194,21 @@ def get_latest_version() -> str:
 
 def write_wheels(
     outdir: str,
-    version: str,
+    tag: str,
     platforms: list[str] | None = None,
 ):
     Path(outdir).mkdir(exist_ok=True)
     if not platforms:
         platforms = list(PROTOC_PLATFORMS)
 
-    if version == "latest":
-        version = get_latest_version()
-    version = version.removeprefix("v")
-    wheel_version = to_pypi_version(version)
+    if tag == "latest":
+        tag = get_latest_tag()
+    wheel_version = to_pypi_version(tag)
 
     for platform in platforms:
         # "30.0-rc1" to "30.0-rc-1"
-        version_in_filename = version.replace("-rc", "-rc-")
-        url = f"https://github.com/protocolbuffers/protobuf/releases/download/v{version}/protoc-{version_in_filename}-{platform}.zip"
+        version_in_filename = tag.removeprefix("v").replace("-rc", "-rc-")
+        url = f"https://github.com/protocolbuffers/protobuf/releases/download/{tag}/protoc-{version_in_filename}-{platform}.zip"
 
         python_platform = PROTOC_PLATFORMS[platform]
 
@@ -239,9 +231,9 @@ def get_argparser():
         prog=__file__, description="Repackage official protoc compiler as Python wheels"
     )
     parser.add_argument(
-        "--version",
+        "--tag",
         default="latest",
-        help="version to package, use `latest` for latest release",
+        help="tag to package, use `latest` for latest release",
     )
     parser.add_argument("--outdir", default="dist/", help="target directory")
     parser.add_argument(
@@ -264,7 +256,7 @@ def main():
     )
     write_wheels(
         outdir=args.outdir,
-        version=args.version,
+        tag=args.tag,
         platforms=args.platform,
     )
 

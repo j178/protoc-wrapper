@@ -1,22 +1,17 @@
-name: Release
+name: Sync protobuf releases
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    permissions:
-      # For PyPI's trusted publishing.
-      id-token: write
-
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - name: Make wheels
-        run: uv run make_wheels.py --version ${{ github.ref_name }}
+        run: uv run sync_releases.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish wheels

@@ -17,5 +17,5 @@ $ uvx protoc-wrapper@30.2 --version
 
 ## TODO
 
-- [ ] Workflow to release new version automatically
+- [x] Workflow to release new version automatically
 - [X] Support prereleases
