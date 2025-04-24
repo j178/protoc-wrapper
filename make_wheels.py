@@ -191,6 +191,7 @@ def to_pypi_version(ver: str) -> str:
 def get_latest_tag() -> str:
     url = "https://api.github.com/repos/protocolbuffers/protobuf/releases?per_page=1"
     resp = session.get(url)
+    resp.raise_for_status()
     data = resp.json()
     return data[0]["tag_name"]
 
@@ -217,6 +218,7 @@ def write_wheels(
 
         logging.info(f"Fetching {url} for {python_platform} ({wheel_version})")
         resp = session.get(url)
+        resp.raise_for_status()
 
         wheel_path = write_protoc_wheel(
             outdir,

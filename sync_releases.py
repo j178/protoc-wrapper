@@ -13,6 +13,7 @@ session = requests.Session()
 def get_pypi_versions(package: str) -> list[str]:
     url = f"https://pypi.org/pypi/{package}/json"
     resp = session.get(url)
+    resp.raise_for_status()
     data = resp.json()
     versions = data["releases"].keys()
     return list(versions)
@@ -28,6 +29,7 @@ def get_latest_releases() -> list[str]:
     releases = []
     while True:
         resp = session.get(url, params={"page": page}, headers=headers)
+        resp.raise_for_status()
         data = resp.json()
         if not data:
             break
