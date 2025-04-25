@@ -199,6 +199,7 @@ def get_latest_tag() -> str:
 def write_wheels(
     outdir: str,
     tag: str,
+    version_suffix: str = "",
     platforms: list[str] | None = None,
 ):
     Path(outdir).mkdir(exist_ok=True)
@@ -207,7 +208,7 @@ def write_wheels(
 
     if tag == "latest":
         tag = get_latest_tag()
-    wheel_version = to_pypi_version(tag)
+    wheel_version = to_pypi_version(tag) + version_suffix
 
     for platform in platforms:
         # "30.0-rc1" to "30.0-rc-1"
@@ -222,7 +223,7 @@ def write_wheels(
 
         wheel_path = write_protoc_wheel(
             outdir,
-            version=str(wheel_version),
+            version=wheel_version,
             platform=python_platform,
             archive=resp.content,
         )
@@ -239,6 +240,11 @@ def get_argparser():
         "--tag",
         default="latest",
         help="tag to package, use `latest` for latest release",
+    )
+    parser.add_argument(
+        "--version-suffix",
+        default="",
+        help="version suffix to append to the wheel version",
     )
     parser.add_argument("--outdir", default="dist/", help="target directory")
     parser.add_argument(
@@ -262,6 +268,7 @@ def main():
     write_wheels(
         outdir=args.outdir,
         tag=args.tag,
+        version_suffix=args.version_suffix,
         platforms=args.platform,
     )
 

@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import time
@@ -19,7 +20,7 @@ def get_pypi_versions(package: str) -> list[str]:
     return list(versions)
 
 
-def get_latest_releases() -> list[str]:
+def get_latest_releases(days: int) -> list[str]:
     url = "https://api.github.com/repos/protocolbuffers/protobuf/releases"
     headers = {"Accept": "application/vnd.github.v3+json"}
     if token := os.getenv("GITHUB_TOKEN"):
@@ -36,7 +37,7 @@ def get_latest_releases() -> list[str]:
 
         for release in data:
             published_at = pendulum.parse(release["published_at"])
-            if published_at < pendulum.now().subtract(days=7):
+            if published_at < pendulum.now().subtract(days=days):
                 continue
             releases.append(release["tag_name"])
 
@@ -54,7 +55,26 @@ def main():
         format="%(asctime)s %(levelname)s %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    releases = get_latest_releases()
+        
+    parser = argparse.ArgumentParser(
+        prog=__file__, description="Sync releases to PyPI"
+    )
+    parser.add_argument(
+        "--days",
+        default=7,
+        help="Number of days to look back for releases",
+        type=int,
+    )
+    parser.add_argument(
+        "--version-suffix",
+        default="",
+        help="Version suffix to append to the version",
+    )
+
+    args = parser.parse_args()
+    logging.info(f"Arguments: {args}")
+
+    releases = get_latest_releases(args.days)
     logging.info(f"Latest releases: {releases}")
 
     pypi_versions = get_pypi_versions("protoc-wrapper")
@@ -65,7 +85,7 @@ def main():
         version = to_pypi_version(release)
         if version not in pypi_versions:
             logging.info(f"Sync release {version} to PyPI")
-            write_wheels(outdir="dist/", tag=release)
+            write_wheels(outdir="dist/", tag=release, version_suffix=args.version_suffix)
 
 
 if __name__ == "__main__":
