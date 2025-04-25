@@ -82,7 +82,7 @@ def main():
     pypi_versions = set(pypi_versions)
 
     for release in releases:
-        version = to_pypi_version(release)
+        version = to_pypi_version(release) + args.version_suffix
         if version not in pypi_versions:
             logging.info(f"Sync release {version} to PyPI")
             write_wheels(outdir="dist/", tag=release, version_suffix=args.version_suffix)
