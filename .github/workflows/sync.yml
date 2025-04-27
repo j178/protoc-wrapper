@@ -7,6 +7,7 @@ on:
       days:
         description: 'Number of days to look back'
         required: true
+        type: number
         default: 7
       version_suffix:
         description: 'Version suffix to append to the version'
@@ -22,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - name: Make wheels
-        run: uv run sync_releases.py --days ${{ github.event.inputs.days }} --version-suffix ${{ github.event.inputs.version_suffix || '' }}
+        run: uv run sync_releases.py --days ${{ github.event.inputs.days || 7 }} --version-suffix ${{ github.event.inputs.version_suffix || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish wheels
