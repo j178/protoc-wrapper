@@ -55,10 +55,8 @@ def main():
         format="%(asctime)s %(levelname)s %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-        
-    parser = argparse.ArgumentParser(
-        prog=__file__, description="Sync releases to PyPI"
-    )
+
+    parser = argparse.ArgumentParser(prog=__file__, description="Sync releases to PyPI")
     parser.add_argument(
         "--days",
         default=7,
@@ -85,7 +83,9 @@ def main():
         version = to_pypi_version(release) + args.version_suffix
         if version not in pypi_versions:
             logging.info(f"Sync release {version} to PyPI")
-            write_wheels(outdir="dist/", tag=release, version_suffix=args.version_suffix)
+            write_wheels(
+                outdir="dist/", tag=release, version_suffix=args.version_suffix
+            )
 
 
 if __name__ == "__main__":

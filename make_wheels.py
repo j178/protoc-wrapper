@@ -209,10 +209,10 @@ def write_wheels(
     if tag == "latest":
         tag = get_latest_tag()
     wheel_version = to_pypi_version(tag) + version_suffix
+    # "30.0-rc1" to "30.0-rc-1"
+    version_in_filename = tag.removeprefix("v").replace("-rc", "-rc-")
 
     for platform in platforms:
-        # "30.0-rc1" to "30.0-rc-1"
-        version_in_filename = tag.removeprefix("v").replace("-rc", "-rc-")
         url = f"https://github.com/protocolbuffers/protobuf/releases/download/{tag}/protoc-{version_in_filename}-{platform}.zip"
 
         python_platform = PROTOC_PLATFORMS[platform]
